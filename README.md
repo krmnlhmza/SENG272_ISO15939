@@ -1,7 +1,7 @@
 
 ISO 15939 Measurement Process Simulator
 SENG272 - Software Project II - Final Project
-
+---------------------------------------------
 
 STUDENT
 -------

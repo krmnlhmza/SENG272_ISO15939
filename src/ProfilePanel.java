@@ -1,9 +1,11 @@
 import javax.swing.*;
 import java.awt.*;
 
+
 public class ProfilePanel extends JPanel {
-    private JTextField userField, schoolField, sessionField;
-    private SessionData sessionData;
+
+    private final JTextField userField, schoolField, sessionField;
+    private final SessionData sessionData;
 
     public ProfilePanel(SessionData sessionData) {
         this.sessionData = sessionData;
@@ -32,15 +34,29 @@ public class ProfilePanel extends JPanel {
     }
 
     public boolean validateData() {
-        if (userField.getText().trim().isEmpty() ||
-                schoolField.getText().trim().isEmpty() ||
-                sessionField.getText().trim().isEmpty()) {
-            JOptionPane.showMessageDialog(this, "All fields must be filled in before proceeding to the next step.", "Validation Error", JOptionPane.WARNING_MESSAGE);
+        if (userField.getText().trim().isEmpty()) {
+            warn("Please enter your username to continue.");
+            userField.requestFocus();
             return false;
         }
-        sessionData.username = userField.getText().trim();
-        sessionData.school = schoolField.getText().trim();
+        if (schoolField.getText().trim().isEmpty()) {
+            warn("Please enter your school name to continue.");
+            schoolField.requestFocus();
+            return false;
+        }
+        if (sessionField.getText().trim().isEmpty()) {
+            warn("Please enter a session name to continue.");
+            sessionField.requestFocus();
+            return false;
+        }
+
+        sessionData.username    = userField.getText().trim();
+        sessionData.school      = schoolField.getText().trim();
         sessionData.sessionName = sessionField.getText().trim();
         return true;
+    }
+
+    private void warn(String msg) {
+        JOptionPane.showMessageDialog(this, msg, "Missing Information", JOptionPane.WARNING_MESSAGE);
     }
 }

@@ -1,9 +1,10 @@
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Scenario {
-    String name;
-    List<Dimension> dimensions;
+    public String name;
+    public List<Dimension> dimensions;
 
     public Scenario(String name) {
         this.name = name;

@@ -1,13 +1,16 @@
 import javax.swing.*;
 import java.awt.*;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+
 public class AnalysePanel extends JPanel {
-    private SessionData sessionData;
-    private JPanel progressPanel;
-    private RadarChartPanel radarPanel;
-    private JLabel gapLabel;
+
+    private final SessionData sessionData;
+    private final JPanel progressPanel;
+    private final RadarChartPanel radarPanel;
+    private final JLabel gapLabel;
 
     public AnalysePanel(SessionData sessionData) {
         this.sessionData = sessionData;
@@ -15,10 +18,11 @@ public class AnalysePanel extends JPanel {
 
         progressPanel = new JPanel();
         progressPanel.setLayout(new BoxLayout(progressPanel, BoxLayout.Y_AXIS));
-        progressPanel.setBorder(BorderFactory.createTitledBorder("Dimension Scores"));
+        progressPanel.setBorder(BorderFactory.createTitledBorder("Dimension Scores (Weighted Average)"));
 
         radarPanel = new RadarChartPanel();
         radarPanel.setPreferredSize(new java.awt.Dimension(300, 300));
+        radarPanel.setBorder(BorderFactory.createTitledBorder("Radar Chart"));
 
         gapLabel = new JLabel();
         gapLabel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
@@ -31,58 +35,95 @@ public class AnalysePanel extends JPanel {
         add(gapLabel, BorderLayout.SOUTH);
     }
 
+
     public void loadData() {
         progressPanel.removeAll();
-        Map<String, Double> dimScores = new HashMap<>();
+        gapLabel.setText("");
 
-        double lowestScore = 6.0;
+
+        if (sessionData.selectedScenario == null
+                || sessionData.selectedScenario.dimensions.isEmpty()) {
+            gapLabel.setText("<html><i>No scenario data to analyse.</i></html>");
+            radarPanel.setScores(new HashMap<>());
+            revalidate();
+            repaint();
+            return;
+        }
+
+
+        Map<String, Double> dimScores = new LinkedHashMap<>();
+        double lowestScore = Double.POSITIVE_INFINITY;
         String lowestDim = "";
 
-        if (sessionData.selectedScenario != null) {
-            for (Dimension d : sessionData.selectedScenario.dimensions) {
-                double num = 0;
-                double den = 0;
-                for (Metric m : d.metrics) {
-                    Double s = sessionData.calculatedScores.get(m.name);
-                    if (s != null) {
-                        num += s * m.coefficient;
-                        den += m.coefficient;
-                    }
-                }
-                double finalScore = den > 0 ? num / den : 0;
-                dimScores.put(d.name, finalScore);
+        for (Dimension d : sessionData.selectedScenario.dimensions) {
+            double weightedSum = 0;
+            double totalCoeff = 0;
 
-                if (finalScore < lowestScore) {
-                    lowestScore = finalScore;
-                    lowestDim = d.name;
+            for (Metric m : d.metrics) {
+                Double s = sessionData.calculatedScores.get(m.name);
+                if (s != null) {
+                    weightedSum += s * m.coefficient;
+                    totalCoeff += m.coefficient;
                 }
-
-                JPanel row = new JPanel(new BorderLayout());
-                row.add(new JLabel(d.name + " (" + String.format("%.2f", finalScore) + ") "), BorderLayout.WEST);
-                JProgressBar pb = new JProgressBar(0, 500);
-                pb.setValue((int)(finalScore * 100));
-                pb.setStringPainted(true);
-                pb.setString(String.format("%.2f", finalScore) + " / 5.0");
-                if (finalScore < 2.5) pb.setForeground(Color.RED);
-                else if (finalScore < 4.0) pb.setForeground(Color.ORANGE);
-                else pb.setForeground(Color.GREEN);
-                row.add(pb, BorderLayout.CENTER);
-                progressPanel.add(row);
-                progressPanel.add(Box.createRigidArea(new java.awt.Dimension(0, 5)));
             }
+
+
+            double dimScore = (totalCoeff > 0) ? (weightedSum / totalCoeff) : 0.0;
+            dimScores.put(d.name, dimScore);
+
+            if (dimScore < lowestScore) {
+                lowestScore = dimScore;
+                lowestDim = d.name;
+            }
+
+            progressPanel.add(buildDimensionRow(d.name, dimScore));
+            progressPanel.add(Box.createRigidArea(new java.awt.Dimension(0, 5)));
         }
 
         radarPanel.setScores(dimScores);
-
-        if (!lowestDim.isEmpty()) {
-            double gap = 5.0 - lowestScore;
-            String level = lowestScore >= 4 ? "Excellent" : (lowestScore >= 3 ? "Good" : (lowestScore >= 2 ? "Needs Improvement" : "Poor"));
-            gapLabel.setText("<html><b>Gap Analysis:</b> Dimension with lowest score is <b>" + lowestDim + "</b> (" + String.format("%.2f", lowestScore) + "). " +
-                    "Gap value: " + String.format("%.2f", gap) + ". Quality level: " + level + ".<br/>" +
-                    "<i>This dimension has the lowest score and requires the most improvement.</i></html>");
-        }
+        writeGapAnalysis(lowestDim, lowestScore);
 
         revalidate();
         repaint();
+    }
+
+
+    private JPanel buildDimensionRow(String name, double score) {
+        JPanel row = new JPanel(new BorderLayout());
+        row.add(new JLabel(name + " (" + String.format("%.2f", score) + ") "), BorderLayout.WEST);
+
+
+
+        JProgressBar pb = new JProgressBar(0, 50);
+        pb.setValue((int) Math.round(score * 10));
+        pb.setStringPainted(true);
+        pb.setString(String.format("%.2f", score) + " / 5.0");
+
+        if (score < 2.5)      pb.setForeground(Color.RED);
+        else if (score < 4.0) pb.setForeground(Color.ORANGE);
+        else                  pb.setForeground(new Color(0, 153, 0));
+
+        row.add(pb, BorderLayout.CENTER);
+        return row;
+    }
+
+
+    private void writeGapAnalysis(String lowestDim, double lowestScore) {
+        if (lowestDim.isEmpty() || Double.isInfinite(lowestScore)) return;
+
+        double gap = 5.0 - lowestScore;
+        String level;
+        if      (lowestScore >= 4.0) level = "Excellent";
+        else if (lowestScore >= 3.0) level = "Good";
+        else if (lowestScore >= 2.0) level = "Needs Improvement";
+        else                         level = "Poor";
+
+        gapLabel.setText(
+                "<html><b>Gap Analysis:</b> Dimension with the lowest score is <b>" + lowestDim + "</b> ("
+                        + String.format("%.2f", lowestScore) + "). "
+                        + "Gap value: " + String.format("%.2f", gap) + ". "
+                        + "Quality level: " + level + ".<br/>"
+                        + "<i>This dimension has the lowest score and requires the most improvement.</i></html>"
+        );
     }
 }

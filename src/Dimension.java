@@ -1,10 +1,11 @@
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class Dimension {
-    String name;
-    double coefficient;
-    List<Metric> metrics;
+    public String name;
+    public double coefficient;
+    public List<Metric> metrics;
 
     public Dimension(String name, double coefficient) {
         this.name = name;

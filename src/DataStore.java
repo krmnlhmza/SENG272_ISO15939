@@ -4,59 +4,126 @@ import java.util.List;
 import java.util.Map;
 
 public class DataStore {
-    Map<String, List<Scenario>> scenariosByMode;
+
+    private final Map<String, List<Scenario>> scenariosByMode;
 
     public DataStore() {
         scenariosByMode = new HashMap<>();
-        initData();
+        initEducationScenarios();
+        initHealthScenarios();
+        initCustomScenarios();
     }
 
-    private void initData() {
+
+    private void initEducationScenarios() {
         List<Scenario> eduScenarios = new ArrayList<>();
+
+
         Scenario sc = new Scenario("Scenario C - Team Alpha");
 
-        Dimension d1 = new Dimension("Usability", 25);
-        d1.addMetric(new Metric("SUS score", 50, true, 0, 100, "points"));
-        d1.addMetric(new Metric("Onboarding time", 50, false, 0, 60, "min"));
+        Dimension cUsability = new Dimension("Usability", 25);
+        cUsability.addMetric(new Metric("SUS score", 50, true, 0, 100, "points"));
+        cUsability.addMetric(new Metric("Onboarding time", 50, false, 0, 60, "min"));
 
-        Dimension d2 = new Dimension("Perf. Efficiency", 20);
-        d2.addMetric(new Metric("Video start time", 50, false, 0, 15, "sec"));
-        d2.addMetric(new Metric("Concurrent exams", 50, true, 0, 600, "users"));
+        Dimension cPerf = new Dimension("Perf. Efficiency", 20);
+        cPerf.addMetric(new Metric("Video start time", 50, false, 0, 15, "sec"));
+        cPerf.addMetric(new Metric("Concurrent exams", 50, true, 0, 600, "users"));
 
-        Dimension d3 = new Dimension("Accessibility", 20);
-        d3.addMetric(new Metric("WCAG compliance", 50, true, 0, 100, "%"));
-        d3.addMetric(new Metric("Screen reader score", 50, true, 0, 100, "%"));
+        Dimension cAccess = new Dimension("Accessibility", 20);
+        cAccess.addMetric(new Metric("WCAG compliance", 50, true, 0, 100, "%"));
+        cAccess.addMetric(new Metric("Screen reader score", 50, true, 0, 100, "%"));
 
-        Dimension d4 = new Dimension("Reliability", 20);
-        d4.addMetric(new Metric("Uptime", 50, true, 95, 100, "%"));
-        d4.addMetric(new Metric("MTTR", 50, false, 0, 120, "min"));
+        Dimension cReliability = new Dimension("Reliability", 20);
+        cReliability.addMetric(new Metric("Uptime", 50, true, 95, 100, "%"));
+        cReliability.addMetric(new Metric("MTTR", 50, false, 0, 120, "min"));
 
-        Dimension d5 = new Dimension("Func. Suitability", 15);
-        d5.addMetric(new Metric("Feature completion", 50, true, 0, 100, "%"));
-        d5.addMetric(new Metric("Assignment submit rate", 50, true, 0, 100, "%"));
+        Dimension cFunc = new Dimension("Func. Suitability", 15);
+        cFunc.addMetric(new Metric("Feature completion", 50, true, 0, 100, "%"));
+        cFunc.addMetric(new Metric("Assignment submit rate", 50, true, 0, 100, "%"));
 
-        sc.addDimension(d1);
-        sc.addDimension(d2);
-        sc.addDimension(d3);
-        sc.addDimension(d4);
-        sc.addDimension(d5);
-
+        sc.addDimension(cUsability);
+        sc.addDimension(cPerf);
+        sc.addDimension(cAccess);
+        sc.addDimension(cReliability);
+        sc.addDimension(cFunc);
         eduScenarios.add(sc);
 
+
         Scenario sd = new Scenario("Scenario D - Team Beta");
-        sd.addDimension(d1);
-        sd.addDimension(d2);
+
+        Dimension dUsability = new Dimension("Usability", 30);
+        dUsability.addMetric(new Metric("SUS score", 60, true, 0, 100, "points"));
+        dUsability.addMetric(new Metric("Help-page visits", 40, false, 0, 200, "visits"));
+
+        Dimension dPerf = new Dimension("Perf. Efficiency", 25);
+        dPerf.addMetric(new Metric("Page load time", 50, false, 0, 8, "sec"));
+        dPerf.addMetric(new Metric("Concurrent users", 50, true, 0, 1000, "users"));
+
+        Dimension dReliability = new Dimension("Reliability", 25);
+        dReliability.addMetric(new Metric("Uptime", 60, true, 95, 100, "%"));
+        dReliability.addMetric(new Metric("Crash rate", 40, false, 0, 10, "%"));
+
+        Dimension dFunc = new Dimension("Func. Suitability", 20);
+        dFunc.addMetric(new Metric("Feature completion", 100, true, 0, 100, "%"));
+
+        sd.addDimension(dUsability);
+        sd.addDimension(dPerf);
+        sd.addDimension(dReliability);
+        sd.addDimension(dFunc);
         eduScenarios.add(sd);
 
+        scenariosByMode.put("Education", eduScenarios);
+    }
+
+
+    private void initHealthScenarios() {
         List<Scenario> healthScenarios = new ArrayList<>();
+
+
         Scenario sh1 = new Scenario("Health Scenario 1 - Patient Portal");
-        Dimension hd1 = new Dimension("Usability", 40);
-        hd1.addMetric(new Metric("Booking time", 100, false, 0, 10, "min"));
-        sh1.addDimension(hd1);
+
+        Dimension h1Usability = new Dimension("Usability", 30);
+        h1Usability.addMetric(new Metric("Booking time", 60, false, 0, 10, "min"));
+        h1Usability.addMetric(new Metric("SUS score", 40, true, 0, 100, "points"));
+
+        Dimension h1Security = new Dimension("Security", 35);
+        h1Security.addMetric(new Metric("Encryption coverage", 50, true, 0, 100, "%"));
+        h1Security.addMetric(new Metric("Auth failure rate", 50, false, 0, 5, "%"));
+
+        Dimension h1Reliability = new Dimension("Reliability", 35);
+        h1Reliability.addMetric(new Metric("Uptime", 60, true, 95, 100, "%"));
+        h1Reliability.addMetric(new Metric("MTTR", 40, false, 0, 60, "min"));
+
+        sh1.addDimension(h1Usability);
+        sh1.addDimension(h1Security);
+        sh1.addDimension(h1Reliability);
         healthScenarios.add(sh1);
 
-        scenariosByMode.put("Education", eduScenarios);
+
+        Scenario sh2 = new Scenario("Health Scenario 2 - Hospital Info System");
+
+        Dimension h2Perf = new Dimension("Perf. Efficiency", 30);
+        h2Perf.addMetric(new Metric("Record fetch time", 50, false, 0, 5, "sec"));
+        h2Perf.addMetric(new Metric("Concurrent doctors", 50, true, 0, 500, "users"));
+
+        Dimension h2Reliability = new Dimension("Reliability", 40);
+        h2Reliability.addMetric(new Metric("Uptime", 60, true, 95, 100, "%"));
+        h2Reliability.addMetric(new Metric("Data loss rate", 40, false, 0, 2, "%"));
+
+        Dimension h2Compatibility = new Dimension("Compatibility", 30);
+        h2Compatibility.addMetric(new Metric("HL7 compliance", 50, true, 0, 100, "%"));
+        h2Compatibility.addMetric(new Metric("Browser support", 50, true, 0, 100, "%"));
+
+        sh2.addDimension(h2Perf);
+        sh2.addDimension(h2Reliability);
+        sh2.addDimension(h2Compatibility);
+        healthScenarios.add(sh2);
+
         scenariosByMode.put("Health", healthScenarios);
+    }
+
+
+    private void initCustomScenarios() {
         scenariosByMode.put("Custom", new ArrayList<>());
     }
 
